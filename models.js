@@ -1,4 +1,4 @@
-import { vectorHelper } from "./helpers.js"
+import { vectorHelper, mapToCamX, mapToCamY } from "./helpers.js"
 
 
 export class Map {
@@ -8,8 +8,17 @@ export class Map {
         this.height = height
     }
 
-    draw() {
-
+    draw(cam) {
+        this.ctx.beginPath()
+        this.ctx.lineWidth = "10"
+        this.ctx.strokeStyle = "red"
+        this.ctx.rect(
+            mapToCamX(0, cam), 
+            mapToCamY(0, cam), 
+            mapToCamX(this.width, cam),
+            mapToCamY(this.height, cam),
+        )
+        this.ctx.stroke()
     }
 }
 
@@ -25,6 +34,7 @@ export class Camera {
     }
 
     update() {
+        console.log(this.x + '|' + this.y)
         this.centerX = this.focus.x
         this.centerY = this.focus.y
     }
@@ -48,29 +58,28 @@ class Player {
         this.d = false
     }
 
-    draw(camera) {
+    draw(cam) {
         this.ctx.beginPath()
-        this.ctx.arc(this.x, this.y, this.r+4, 0, Math.PI*2, false)
+        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r+4, 0, Math.PI*2, false)
         this.ctx.fillStyle = 'rgb(200, 0, 0)'
         this.ctx.fill()
 
         this.ctx.beginPath()
-        this.ctx.arc(this.x, this.y, this.r, 0, Math.PI*2, false)
+        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
         this.ctx.fillStyle = this.col
         this.ctx.fill()
 
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.x,this.y);
-        const tarCoor = vectorHelper(this.x, this.y, this.curX, this.curY, this.r)
-        this.ctx.lineTo(this.x + tarCoor.x, this.y + tarCoor.y);
+        this.ctx.beginPath()
+        this.ctx.moveTo(mapToCamX(this.x, cam),mapToCamY(this.y, cam))
+        const tarCoor = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
+        this.ctx.lineTo(mapToCamX(this.x, cam) + tarCoor.x, mapToCamY(this.y, cam) + tarCoor.y)
         this.ctx.lineWidth = 4
         this.ctx.strokeStyle = 'rgb(200, 0, 0)'
         this.ctx.stroke()
     }
 
-    update() {
-        console.log(this.x + '|' + this.y)
-        this.draw()
+    update(cam) {
+        this.draw(cam)
         if (this.w) this.y -= this.v
         if (this.s) this.y += this.v
         if (this.a) this.x -= this.v
@@ -89,15 +98,15 @@ class Bullet {
         this.v = v
     }
 
-    draw(camera) {
+    draw(cam) {
         this.ctx.beginPath()
-        this.ctx.arc(this.x, this.y, this.r, 0, Math.PI*2, false)
+        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
         this.ctx.fillStyle = this.col
         this.ctx.fill()
     }
 
-    update() {
-        this.draw()
+    update(cam) {
+        this.draw(cam)
         this.x += this.v.x
         this.y += this.v.y
     }
@@ -114,7 +123,7 @@ class Bot {
         this.v = v
     }
 
-    draw(camera) {
+    draw(cam) {
         this.ctx.beginPath()
         this.ctx.arc(this.x, this.y, this.r, 0, Math.PI*2, false)
         this.ctx.fillStyle = this.col
@@ -143,8 +152,8 @@ export class Game {
         this.ctx = ctx
         this.canvas = canvas
         this.map = new Map(ctx, 5120, 2880)
-        this.player = new Player(ctx, canvas.width/2, canvas.height/2, 26, 'rgb(0, 0, 0)', 2, 5)
-        this.Camera = new Camera(ctx, canvas.width, canvas.height, this.player)
+        this.player = new Player(ctx, 100, 100, 26, 'rgb(0, 0, 0)', 2, 6)
+        this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
         this.botLst = botFactory(0)
     }
@@ -157,7 +166,13 @@ export class Game {
                 player.y, 
                 8, 
                 'rgb(50, 255, 50)', 
-                vectorHelper(player.x, player.y, e.clientX, e.clientY, player.bulletV)
+                vectorHelper(
+                    mapToCamX(player.x, this.camera),
+                    mapToCamY(player.y, this.camera),
+                    e.clientX,
+                    e.clientY,
+                    player.bulletV
+                )
             )
         )
     }

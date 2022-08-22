@@ -13,3 +13,11 @@ export function vectorHelper(selfX, selfY, tarX, tarY, vectorVal) {
     }
     return v
 }
+
+export function mapToCamX(mapX, cam) {
+    return mapX - (cam.centerX-cam.width/2)
+}
+
+export function mapToCamY(mapY, cam) {
+    return mapY - (cam.centerY-cam.height/2)
+}
