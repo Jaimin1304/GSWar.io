@@ -13,14 +13,16 @@ function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     game.camera.update(game.camera)
 
+    game.map.draw(game.camera)
     game.bulletLst.forEach(element => {
         element.update(game.camera)
     });
     game.botLst.forEach(element => {
         element.update(game.camera)
+        game.map.detectOut(element)
     });
-    game.map.draw(game.camera)
     game.player.update(game.camera)
+    game.map.detectOut(game.player)
 }
 
 addEventListener('mousemove', (e) => {

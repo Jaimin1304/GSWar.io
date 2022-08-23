@@ -8,10 +8,17 @@ export class Map {
         this.height = height
     }
 
+    detectOut(gameObj) {
+        if (gameObj.x < 0) gameObj.x = 0
+        if (gameObj.x > this.width) gameObj.x = this.width
+        if (gameObj.y < 0) gameObj.y = 0
+        if (gameObj.y > this.height) gameObj.y = this.height
+    }
+
     draw(cam) {
         this.ctx.beginPath()
         this.ctx.lineWidth = "10"
-        this.ctx.strokeStyle = "red"
+        this.ctx.strokeStyle = "rgb(255,0,100)"
         this.ctx.rect(
             mapToCamX(0, cam), 
             mapToCamY(0, cam), 
