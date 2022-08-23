@@ -1,4 +1,6 @@
-import { vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine } from "./helpers.js"
+import { 
+    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle 
+} from "./helpers.js"
 
 
 export class Map {
@@ -41,7 +43,6 @@ export class Camera {
     }
 
     update() {
-        console.log(this.x + '|' + this.y)
         this.centerX = this.focus.x
         this.centerY = this.focus.y
     }
@@ -59,7 +60,8 @@ class MoveObj {
     }
 
     draw(cam) {
-        drawCircle(this.ctx, this.x, this.y, this.r+4, 'rgb(255, 100, 100)', cam)
+        //drawGradientCircle(this.ctx, this.x, this.y, 3, 12, 'red', 'white', cam)
+        drawCircle(this.ctx, this.x, this.y, this.r+3, 'rgb(255, 100, 100)', cam)
         drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
     }
 
@@ -86,12 +88,14 @@ class Character extends MoveObj {
     }
 
     draw(cam) {
+        //drawGradientCircle(this.ctx, this.x, this.y, 20, 35, 'red', 'white', cam)
         drawCircle(this.ctx, this.x, this.y, this.r+4, 'rgb(255, 100, 100)', cam)
         drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
         const vector = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
         const x2 = this.x + vector.x
         const y2 = this.y + vector.y
         drawLine(this.ctx, this.x, this.y, x2, y2, 5, 'rgb(255, 100, 100)', cam)
+
     }
 }
 
