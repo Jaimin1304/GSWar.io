@@ -21,3 +21,32 @@ export function mapToCamX(mapX, cam) {
 export function mapToCamY(mapY, cam) {
     return mapY - (cam.centerY-cam.height/2)
 }
+
+export function colArrToStr(colArr) {
+    return `rgb(${col[0]}, ${col[1]}, ${col[2]})`
+}
+
+export function drawCircle(ctx, x, y, r, col, cam=null) {
+    ctx.beginPath()
+    if (cam == null) { // draw on map
+        ctx.arc(x, y, r, 0, Math.PI*2, false)
+    } else { // draw on camera
+        ctx.arc(mapToCamX(x, cam), mapToCamY(y, cam), r, 0, Math.PI*2, false)
+    }
+    ctx.fillStyle = col
+    ctx.fill()
+}
+
+export function drawLine(ctx, x1, y1, x2, y2, width, col, cam=null) {
+    ctx.beginPath()
+    if (cam == null) { // draw on map
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+    } else { // draw on camera
+        ctx.moveTo(mapToCamX(x1, cam), mapToCamY(y1, cam))
+        ctx.lineTo(mapToCamX(x2, cam), mapToCamY(y2, cam))
+    }
+    ctx.lineWidth = width
+    ctx.strokeStyle = col
+    ctx.stroke()
+}

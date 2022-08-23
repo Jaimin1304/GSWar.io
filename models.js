@@ -1,4 +1,4 @@
-import { vectorHelper, mapToCamX, mapToCamY } from "./helpers.js"
+import { vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine } from "./helpers.js"
 
 
 export class Map {
@@ -17,7 +17,7 @@ export class Map {
 
     draw(cam) {
         this.ctx.beginPath()
-        this.ctx.lineWidth = "10"
+        this.ctx.lineWidth = "12"
         this.ctx.strokeStyle = "rgb(255,0,100)"
         this.ctx.rect(
             mapToCamX(0, cam), 
@@ -59,15 +59,8 @@ class MoveObj {
     }
 
     draw(cam) {
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r+4, 0, Math.PI*2, false)
-        this.ctx.fillStyle = 'rgb(200, 0, 0)'
-        this.ctx.fill()
-
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
-        this.ctx.fillStyle = this.col
-        this.ctx.fill()
+        drawCircle(this.ctx, this.x, this.y, this.r+4, 'rgb(255, 100, 100)', cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
     }
 
     update(cam) {
@@ -93,23 +86,12 @@ class Character extends MoveObj {
     }
 
     draw(cam) {
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r+4, 0, Math.PI*2, false)
-        this.ctx.fillStyle = 'rgb(200, 0, 0)'
-        this.ctx.fill()
-
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
-        this.ctx.fillStyle = this.col
-        this.ctx.fill()
-
-        this.ctx.beginPath()
-        this.ctx.moveTo(mapToCamX(this.x, cam),mapToCamY(this.y, cam))
-        const tarCoor = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
-        this.ctx.lineTo(mapToCamX(this.x, cam) + tarCoor.x, mapToCamY(this.y, cam) + tarCoor.y)
-        this.ctx.lineWidth = 4
-        this.ctx.strokeStyle = 'rgb(200, 0, 0)'
-        this.ctx.stroke()
+        drawCircle(this.ctx, this.x, this.y, this.r+4, 'rgb(255, 100, 100)', cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
+        const vector = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
+        const x2 = this.x + vector.x
+        const y2 = this.y + vector.y
+        drawLine(this.ctx, this.x, this.y, x2, y2, 5, 'rgb(255, 100, 100)', cam)
     }
 }
 
@@ -146,7 +128,6 @@ class Bot extends Character {
 
     update(cam) {
         this.draw(cam)
-        //this.v = vectorHelper(this.x, this.y, this.tarX, this.tarY, vVal)
         this.v = {x: 0, y: 0}
         this.x += this.v.x
         this.y += this.v.y
@@ -176,27 +157,33 @@ export class Game {
     constructor(ctx, canvas) {
         this.ctx = ctx
         this.canvas = canvas
+        // Identification Aura of different teams
+        this.wtTeamSupCol = 'rgb(100, 100, 255)'
+        this.bkTeamSupCol = 'rgb(255, 100, 100)'
+        // game elements
         this.map = new Map(ctx, 3000, 1500)
         this.player = new Player(ctx, 100, 100, 26, 'rgb(0, 0, 0)', 3, 7)
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
         this.botLst = botFactory(10, ctx)
+        this.wtTeam = []
+        this.bkTeam = []
     }
 
-    shootBullet(player, e) {
+    shootBullet(character, e) {
         this.bulletLst.push(
             new Bullet(
                 this.ctx,
-                player.x, 
-                player.y, 
+                character.x, 
+                character.y, 
                 8, 
-                'rgb(0, 0, 0)', 
+                character.col, 
                 vectorHelper(
-                    mapToCamX(player.x, this.camera),
-                    mapToCamY(player.y, this.camera),
+                    mapToCamX(character.x, this.camera),
+                    mapToCamY(character.y, this.camera),
                     e.clientX,
                     e.clientY,
-                    player.bulletV
+                    character.bulletV
                 )
             )
         )
