@@ -8,11 +8,11 @@ export class Map {
         this.height = height
     }
 
-    detectOut(gameObj) {
-        if (gameObj.x < 0) gameObj.x = 0
-        if (gameObj.x > this.width) gameObj.x = this.width
-        if (gameObj.y < 0) gameObj.y = 0
-        if (gameObj.y > this.height) gameObj.y = this.height
+    detectOut(moveObj) {
+        if (moveObj.x < 0) moveObj.x = 0
+        if (moveObj.x > this.width) moveObj.x = this.width
+        if (moveObj.y < 0) moveObj.y = 0
+        if (moveObj.y > this.height) moveObj.y = this.height
     }
 
     draw(cam) {
@@ -48,54 +48,7 @@ export class Camera {
 }
 
 
-class Player {
-    constructor(ctx, x, y, r, col, v, bulletV) {
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.r = r
-        this.col = col
-        this.v = v
-        this.bulletV = bulletV
-        this.curX = 0
-        this.curY = 0
-        this.w = false
-        this.s = false
-        this.a = false
-        this.d = false
-    }
-
-    draw(cam) {
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r+4, 0, Math.PI*2, false)
-        this.ctx.fillStyle = 'rgb(200, 0, 0)'
-        this.ctx.fill()
-
-        this.ctx.beginPath()
-        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
-        this.ctx.fillStyle = this.col
-        this.ctx.fill()
-
-        this.ctx.beginPath()
-        this.ctx.moveTo(mapToCamX(this.x, cam),mapToCamY(this.y, cam))
-        const tarCoor = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
-        this.ctx.lineTo(mapToCamX(this.x, cam) + tarCoor.x, mapToCamY(this.y, cam) + tarCoor.y)
-        this.ctx.lineWidth = 4
-        this.ctx.strokeStyle = 'rgb(200, 0, 0)'
-        this.ctx.stroke()
-    }
-
-    update(cam) {
-        this.draw(cam)
-        if (this.w) this.y -= this.v
-        if (this.s) this.y += this.v
-        if (this.a) this.x -= this.v
-        if (this.d) this.x += this.v
-    }
-}
-
-
-class Bullet {
+class MoveObj {
     constructor(ctx, x, y, r, col, v) {
         this.ctx = ctx
         this.x = x
@@ -106,6 +59,11 @@ class Bullet {
     }
 
     draw(cam) {
+        this.ctx.beginPath()
+        this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r+4, 0, Math.PI*2, false)
+        this.ctx.fillStyle = 'rgb(200, 0, 0)'
+        this.ctx.fill()
+
         this.ctx.beginPath()
         this.ctx.arc(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.r, 0, Math.PI*2, false)
         this.ctx.fillStyle = this.col
@@ -120,21 +78,18 @@ class Bullet {
 }
 
 
-class Bot {
-    constructor(ctx, x, y, r, col, v, bulletV) {
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.r = r
-        this.col = col
-        this.v = v
+class Bullet extends MoveObj {
+    constructor(ctx, x, y, r, col, v) {
+        super(ctx, x, y, r, col, v)
+    }
+}
+
+
+class Character extends MoveObj {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
+        super(ctx, x, y, r, col, v)
         this.bulletV = bulletV
-        this.curX = 0
-        this.curY = 0
-        this.w = false
-        this.s = false
-        this.a = false
-        this.d = false
+        this.vVal = vVal
     }
 
     draw(cam) {
@@ -156,9 +111,43 @@ class Bot {
         this.ctx.strokeStyle = 'rgb(200, 0, 0)'
         this.ctx.stroke()
     }
+}
+
+
+class Player extends Character {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
+        super(ctx, x, y, r, col, v, bulletV, vVal)
+        this.curX = 0
+        this.curY = 0
+        this.w = false
+        this.s = false
+        this.a = false
+        this.d = false
+    }
 
     update(cam) {
         this.draw(cam)
+        if (this.w) this.y -= this.v
+        if (this.s) this.y += this.v
+        if (this.a) this.x -= this.v
+        if (this.d) this.x += this.v
+    }
+}
+
+
+class Bot extends Character {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
+        super(ctx, x, y, r, col, v, bulletV, vVal)
+        this.curX = 0
+        this.curY = 0
+        this.tarX = 0
+        this.tarY = 0
+    }
+
+    update(cam) {
+        this.draw(cam)
+        //this.v = vectorHelper(this.x, this.y, this.tarX, this.tarY, vVal)
+        this.v = {x: 0, y: 0}
         this.x += this.v.x
         this.y += this.v.y
     }
