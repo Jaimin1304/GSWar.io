@@ -11,6 +11,7 @@ const game = new Game(ctx, canvas)
 function animate() {
     requestAnimationFrame(animate)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    game.camera.update(game.camera)
 
     game.bulletLst.forEach(element => {
         element.update(game.camera)
@@ -20,7 +21,6 @@ function animate() {
     });
     game.map.draw(game.camera)
     game.player.update(game.camera)
-    game.camera.update(game.camera)
 }
 
 addEventListener('mousemove', (e) => {
