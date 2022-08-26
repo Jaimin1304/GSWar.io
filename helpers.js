@@ -28,7 +28,7 @@ export function mapToCamY(mapY, cam) {
 }
 
 export function colArrToStr(colArr) {
-    return `rgb(${col[0]}, ${col[1]}, ${col[2]})`
+    return `rgb(${colArr[0]}, ${colArr[1]}, ${colArr[2]})`
 }
 
 export function drawCircle(ctx, x, y, r, col, cam=null) {
@@ -80,4 +80,11 @@ export function drawLine(ctx, x1, y1, x2, y2, width, col, cam=null) {
     ctx.lineWidth = width
     ctx.strokeStyle = col
     ctx.stroke()
+}
+
+export function drawName(ctx, char, cam) {
+    ctx.font = "30px Comic Sans MS"
+    ctx.fillStyle = "red"
+    ctx.textAlign = "center"
+    ctx.fillText(char.name, mapToCamX(char.x, cam), mapToCamY(char.y, cam)-45)
 }

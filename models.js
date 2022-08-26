@@ -1,5 +1,5 @@
 import { 
-    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle,EuDistance
+    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle,EuDistance,drawName
 } from "./helpers.js"
 
 
@@ -62,7 +62,7 @@ class MoveObj {
     draw(cam) {
         //drawGradientCircle(this.ctx, this.x, this.y, 3, 12, 'red', 'white', cam)
         drawCircle(this.ctx, this.x, this.y, this.r+3, 'rgb(255, 100, 100)', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, colArrToStr(this.col), cam)
     }
 
     update(cam) {
@@ -90,25 +90,28 @@ class Bullet extends MoveObj {
     constructor(ctx, x, y, r, col, v) {
         super(ctx, x, y, r, col, v)
     }
+
+    
 }
 
 
 class Character extends MoveObj {
-    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal, name) {
         super(ctx, x, y, r, col, v)
         this.bulletV = bulletV
         this.vVal = vVal
+        this.name = name
     }
 
     draw(cam) {
         //drawGradientCircle(this.ctx, this.x, this.y, 20, 35, 'red', 'white', cam)
         drawCircle(this.ctx, this.x, this.y, this.r+4, 'rgb(255, 100, 100)', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, colArrToStr(this.col), cam)
         const vector = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
         const x2 = this.x + vector.x
         const y2 = this.y + vector.y
         drawLine(this.ctx, this.x, this.y, x2, y2, 5, 'rgb(255, 100, 100)', cam)
-
+        drawName(this.ctx, this, cam)
     }
 
     bounceback(){
@@ -121,8 +124,8 @@ class Character extends MoveObj {
 
 
 class Player extends Character {
-    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
-        super(ctx, x, y, r, col, v, bulletV, vVal)
+    constructor(ctx, x, y, r, col, v, bulletV, vVal, name) {
+        super(ctx, x, y, r, col, v, bulletV, vVal, name)
         this.curX = 0
         this.curY = 0
         this.w = false
@@ -133,10 +136,10 @@ class Player extends Character {
 
     update(cam) {
         this.draw(cam)
-        if (this.w) this.y -= this.v
-        if (this.s) this.y += this.v
-        if (this.a) this.x -= this.v
-        if (this.d) this.x += this.v
+        if (this.w) this.y -= this.v.y
+        if (this.s) this.y += this.v.y
+        if (this.a) this.x -= this.v.x
+        if (this.d) this.x += this.v.x
     }
 
 
@@ -145,8 +148,8 @@ class Player extends Character {
 
 
 class Bot extends Character {
-    constructor(ctx, x, y, r, col, v, bulletV, vVal) {
-        super(ctx, x, y, r, col, v, bulletV, vVal)
+    constructor(ctx, x, y, r, col, v, bulletV, vVal, name) {
+        super(ctx, x, y, r, col, v, bulletV, vVal, name)
         this.curX = 0
         this.curY = 0
         this.tarX = 0
@@ -171,8 +174,11 @@ function botFactory(num, ctx) {
                 100+Math.random()*2000,
                 100+Math.random()*1000,
                 26,
-                'rgb(255, 255, 255)',
+                [255, 255, 255],
                 {x: 0, y: 0},
+                3,
+                7,
+                `Bot ${i}`,
             )
         )
     }
@@ -185,11 +191,11 @@ export class Game {
         this.ctx = ctx
         this.canvas = canvas
         // Identification Aura of different teams
-        this.wtTeamSupCol = 'rgb(100, 100, 255)'
-        this.bkTeamSupCol = 'rgb(255, 100, 100)'
+        this.wtTeamSupCol = [100, 100, 255]
+        this.bkTeamSupCol = [255, 100, 100]
         // game elements
         this.map = new Map(ctx, 3000, 1500)
-        this.player = new Player(ctx, 100, 100, 26, 'rgb(0, 0, 0)', 3, 7)
+        this.player = new Player(ctx, 100, 100, 26, [0, 0, 0], {x: 2, y: 2}, 7, 7, 'Luke')
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
         this.botLst = botFactory(10, ctx)
