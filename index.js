@@ -16,6 +16,7 @@ function animate() {
     game.map.draw(game.camera)
     game.bulletLst.forEach(element => {
         element.update(game.camera)
+        
     });
     game.botLst.forEach(element => {
         element.update(game.camera)
@@ -26,6 +27,17 @@ function animate() {
             game.player.bounceback()
             
         }
+        game.bulletLst.forEach(bull =>{
+            result = bull.shoot(element)
+            if(result){
+                var i = game.bulletLst.indexOf(bull)
+                game.bulletLst.splice(i,1)
+            }
+
+
+       
+        }
+        )
     });
     game.player.update(game.camera)
     game.map.detectOut(game.player)

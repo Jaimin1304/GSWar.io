@@ -91,6 +91,26 @@ class Bullet extends MoveObj {
         super(ctx, x, y, r, col, v)
     }
 
+    shoot(Obj){
+
+        if(this.detectEntity(Obj)){
+            var i = 0
+            while(i<3){
+                if(this.col[i]<Obj.col[i]){
+                    Obj.col[i] = Obj.col[i]-3
+                }else{
+                    Obj.col[i] = Obj.col[i]+3
+                }
+                i = i+1
+            }
+            return true
+
+        }
+        return false
+
+
+    }
+
     
 }
 
