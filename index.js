@@ -20,9 +20,16 @@ function animate() {
     game.botLst.forEach(element => {
         element.update(game.camera)
         game.map.detectOut(element)
+        let result = game.player.detectEntity(element)
+        console.log(result)
+        if(game.player.detectEntity(element)){
+            game.player.bounceback()
+            
+        }
     });
     game.player.update(game.camera)
     game.map.detectOut(game.player)
+    
 }
 
 addEventListener('mousemove', (e) => {

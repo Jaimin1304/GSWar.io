@@ -13,7 +13,12 @@ export function vectorHelper(selfX, selfY, tarX, tarY, vectorVal) {
     }
     return v
 }
+export function EuDistance(x1,y1,x2,y2){
+    var a = x1-x2
+    var b = y1 -y2 
+    return Math.sqrt(a*a+b*b)
 
+} 
 export function mapToCamX(mapX, cam) {
     return mapX - (cam.centerX-cam.width/2)
 }

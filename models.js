@@ -1,5 +1,5 @@
 import { 
-    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle 
+    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle,EuDistance
 } from "./helpers.js"
 
 
@@ -70,6 +70,19 @@ class MoveObj {
         this.x += this.v.x
         this.y += this.v.y
     }
+
+    detectEntity(Obj){
+        const distance = EuDistance(this.x,this.y,Obj.x,Obj.y)
+
+
+        if(distance <= (this.r + Obj.r) ){
+            return true
+        }
+
+        return false
+    }
+
+    
 }
 
 
@@ -97,6 +110,13 @@ class Character extends MoveObj {
         drawLine(this.ctx, this.x, this.y, x2, y2, 5, 'rgb(255, 100, 100)', cam)
 
     }
+
+    bounceback(){
+        //this.v = {x:-1*this.v.x,y:-1*this.v.y}
+        this.x = this.x-3
+        this.y = this.y-3
+
+    }
 }
 
 
@@ -118,6 +138,9 @@ class Player extends Character {
         if (this.a) this.x -= this.v
         if (this.d) this.x += this.v
     }
+
+
+
 }
 
 
