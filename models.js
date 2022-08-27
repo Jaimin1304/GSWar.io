@@ -2,7 +2,6 @@ import {
     vectorHelper, 
     mapToCamX, 
     mapToCamY, 
-    colArrToStr, 
     drawCircle, 
     drawLine, 
     drawGradientCircle, 
@@ -10,6 +9,7 @@ import {
     drawName,
     drawRect,
     drawProgress,
+    calculateCurscore,
 } from "./helpers.js"
 
 
@@ -20,31 +20,41 @@ export class Map {
         this.height = height
         this.wtTeam = wtTeam
         this.bkTeam = bkTeam
+        this.gridGap = 100
     }
 
-    mapRestrict(moveObj) {
-        if (moveObj.x < 0) moveObj.x = 0
-        if (moveObj.x > this.width) moveObj.x = this.width
-        if (moveObj.y < 0) moveObj.y = 0
-        if (moveObj.y > this.height) moveObj.y = this.height
+    mapRestrict(moveobj) {
+        if (moveobj.x < 0) moveobj.x = 0
+        if (moveobj.x > this.width) moveobj.x = this.width
+        if (moveobj.y < 0) moveobj.y = 0
+        if (moveobj.y > this.height) moveobj.y = this.height
     }
 
-    detectOut(moveObj) {
-        return (moveObj.x < 0 || 
-               moveObj.x > this.width || 
-               moveObj.y < 0 || 
-               moveObj.y > this.height)
+    detectOut(moveobj) {
+        return (moveobj.x < 0 || 
+               moveobj.x > this.width || 
+               moveobj.y < 0 || 
+               moveobj.y > this.height)
     }
 
-    draw(cam,canvas) {
+    draw(cam,canvas,percentage) {
         let rgbLst = [80, 80, 80]
+        // draw grid
+        for (let i = 0; i < this.width; i+=this.gridGap) {
+            drawLine(this.ctx, i, 0, i, this.height, 1, [200, 200, 200], cam)
+        }
+        for (let i = 0; i < this.height; i+=this.gridGap) {
+            drawLine(this.ctx, 0, i, this.width, i, 1, [200, 200, 200], cam)
+        }
+        // draw boundary
         drawRect(this.ctx, 0, 0, this.width, this.height, 14, [255, 0, 0], cam)
+        // draw bases
         drawCircle(
             this.ctx,
             this.wtTeam.base.x,
             this.wtTeam.base.y,
             this.wtTeam.base.r,
-            colArrToStr(this.wtTeam.supCol.map((a, i) => a + rgbLst[i])),
+            this.wtTeam.supCol.map((a, i) => a + rgbLst[i]),
             cam,
         )
         drawCircle(
@@ -52,10 +62,10 @@ export class Map {
             this.bkTeam.base.x,
             this.bkTeam.base.y,
             this.bkTeam.base.r,
-            colArrToStr(this.bkTeam.supCol.map((a, i) => a + rgbLst[i])),
+            this.bkTeam.supCol.map((a, i) => a + rgbLst[i]),
             cam,
         )
-        drawProgress(this.ctx,canvas)
+        drawProgress(this.ctx,canvas,percentage)
     }
 }
 
@@ -77,7 +87,7 @@ export class Camera {
 }
 
 
-class MoveObj {
+class Moveobj {
     constructor(ctx, x, y, r, col, v) {
         this.ctx = ctx
         this.x = x
@@ -89,8 +99,8 @@ class MoveObj {
 
     draw(cam) {
         //drawGradientCircle(this.ctx, this.x, this.y, 3, 12, 'red', 'white', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r+3, 'rgb(255, 100, 100)', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r, colArrToStr(this.col), cam)
+        drawCircle(this.ctx, this.x, this.y, this.r+3, [255, 100, 100], cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
     }
 
     update(cam) {
@@ -99,9 +109,9 @@ class MoveObj {
         this.y += this.v.y
     }
 
-    detectEntity(Obj) {
-        const distance = EuDistance(this.x,this.y,Obj.x,Obj.y)
-        if (distance <= (this.r + Obj.r)) {
+    detectEntity(obj) {
+        const distance = EuDistance(this.x,this.y,obj.x,obj.y)
+        if (distance <= (this.r + obj.r)) {
             return true
         }
         return false
@@ -109,7 +119,7 @@ class MoveObj {
 }
 
 
-class Bullet extends MoveObj {
+class Bullet extends Moveobj {
     constructor(ctx, x, y, r, col, v, char) {
         super(ctx, x, y, r, col, v)
         this.char = char
@@ -117,18 +127,18 @@ class Bullet extends MoveObj {
 
     draw(cam) {
         //drawGradientCircle(this.ctx, this.x, this.y, 3, 12, 'red', 'white', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r+3, colArrToStr(this.char.team.supCol), cam)
-        drawCircle(this.ctx, this.x, this.y, this.r, colArrToStr(this.col), cam)
+        drawCircle(this.ctx, this.x, this.y, this.r+3, this.char.team.supCol, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
     }
 
-    shoot(Obj) {
-        if (this.detectEntity(Obj) && this.col[0] != Obj.col[0]) {
+    shoot(obj) {
+        if (this.detectEntity(obj) && this.col[0] != obj.col[0]) {
             var i = 0
             while (i<3) {
-                if(this.col[i]<Obj.col[i]){
-                    Obj.col[i] = Obj.col[i]-3
+                if(this.col[i]<obj.col[i]){
+                    obj.col[i] = obj.col[i]-10
                 }else{
-                    Obj.col[i] = Obj.col[i]+3
+                    obj.col[i] = obj.col[i]+10
                 }
                 i = i+1
             }
@@ -139,7 +149,7 @@ class Bullet extends MoveObj {
 }
 
 
-class Character extends MoveObj {
+class Character extends Moveobj {
     constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team) {
         super(ctx, x, y, r, col, v)
         this.bulletV = bulletV
@@ -150,12 +160,12 @@ class Character extends MoveObj {
 
     draw(cam) {
         //drawGradientCircle(this.ctx, this.x, this.y, 20, 35, 'red', 'white', cam)
-        drawCircle(this.ctx, this.x, this.y, this.r+4, colArrToStr(this.team.supCol), cam)
-        drawCircle(this.ctx, this.x, this.y, this.r, colArrToStr(this.col), cam)
+        drawCircle(this.ctx, this.x, this.y, this.r+4, this.team.supCol, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
         const vector = vectorHelper(mapToCamX(this.x, cam), mapToCamY(this.y, cam), this.curX, this.curY, this.r)
         const x2 = this.x + vector.x
         const y2 = this.y + vector.y
-        drawLine(this.ctx, this.x, this.y, x2, y2, 5, colArrToStr(this.team.supCol), cam)
+        drawLine(this.ctx, this.x, this.y, x2, y2, 5, this.team.supCol, cam)
         drawName(this.ctx, this, cam, this.team.supCol)
     }
 
@@ -186,7 +196,8 @@ class Character extends MoveObj {
         this.y += this.v.y
     }
 
-    bounceback(obj){
+    bounceback(obj) {
+        // do math
         let a = obj.x - this.x
         let b = obj.y - this.y
         let l = (a**2 + b**2)**(1/2)
@@ -222,7 +233,7 @@ class Player extends Character {
 }
 
 
-class Bot extends Character {
+export class Bot extends Character {
     constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team) {
         super(ctx, x, y, r, col, v, bulletV, vVal, name, team)
         this.curX = 0
@@ -244,13 +255,13 @@ class Bot extends Character {
     }
 
     vision(game) {
-        var botlist = game.botLst
+        var botlist = game.cLst
         var player = game.player
         var messageList = [[this.x,this.y,player.x,player.y]]
-        for(let i in botlist){
-            if(botlist[i].team.id != this.team.id){
+        for(let i in botlist) {
+            if(botlist[i].team.id != this.team.id) {
                 messageList.push([this.x,this.y,i.x,i.y])
-            }     
+            }
         }
         var npos1 = [this.x+1,this.y]
         var npos2 = [this.x-1,this.y]
@@ -260,8 +271,7 @@ class Bot extends Character {
         var distance = Infinity
         for(let key in messageList){
             var rd = EuDistance(messageList[key][0],messageList[key][1],messageList[key][2],messageList[key][3])
-            console.log(rd)
-            if(distance > rd){     
+            if(distance > rd){
                 distance = rd
                 nearest = [messageList[key][2],messageList[key][3]]
             }
@@ -272,20 +282,16 @@ class Bot extends Character {
         distance = Infinity
         var nextpositon 
         var positionarray = [npos1,npos2,npos3,npos4]
-        for(let a in positionarray){
+        for(let a in positionarray) {
             var d = EuDistance(nearest[0],nearest[1],positionarray[a][0],positionarray[a][1])
-    
             if(distance > d){
                 distance = d
                 nextpositon = positionarray[a]
-                console.log(a)
             }
-
         }
-        
         return nextpositon
-
     }
+
     behave(game){
         var nextposition = this.vision(game)
         this.move(nextposition[0],nextposition[1])
@@ -333,7 +339,7 @@ export class Game {
             },
         }
         const bkTeam = {
-            id: 0,
+            id: 1,
             teamCol: [0, 0, 0],
             supCol: [255, 100, 100],
             base: {
@@ -344,10 +350,10 @@ export class Game {
         }
         // game elements
         this.map = new Map(ctx, mapWidth, mapHeight, wtTeam, bkTeam)
-        this.player = new Player(ctx, 100, 100, 26, [0, 0, 0], {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
+        this.player = new Player(ctx, 100, 100, 26, wtTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
-        this.cLst = botFactory(8, ctx, bkTeam)
+        this.cLst = botFactory(8, ctx, bkTeam).concat(botFactory(7, ctx, wtTeam))
         this.cLst.push(this.player)
     }
 
