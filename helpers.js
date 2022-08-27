@@ -85,9 +85,9 @@ export function drawLine(ctx, x1, y1, x2, y2, width, col, cam=null) {
     ctx.stroke()
 }
 
-export function drawName(ctx, char, cam) {
-    ctx.font = "30px Comic Sans MS"
-    ctx.fillStyle = "red"
+export function drawName(ctx, char, cam, col) {
+    ctx.font = "25px Comic Sans MS"
+    ctx.fillStyle = colArrToStr(col)
     ctx.textAlign = "center"
-    ctx.fillText(char.name, mapToCamX(char.x, cam), mapToCamY(char.y, cam)-45)
+    ctx.fillText(`${char.name} (${char.col[0]})`, mapToCamX(char.x, cam), mapToCamY(char.y, cam)-char.r*1.5)
 }

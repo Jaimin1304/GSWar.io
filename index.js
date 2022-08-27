@@ -16,30 +16,26 @@ function animate() {
     game.map.draw(game.camera)
     game.bulletLst.forEach(element => {
         element.update(game.camera)
-        
     });
     game.botLst.forEach(element => {
         element.update(game.camera)
         game.map.detectOut(element)
         let result = game.player.detectEntity(element)
         console.log(result)
-        if(game.player.detectEntity(element)){
+        if (game.player.detectEntity(element)) {
             game.player.bounceback()
-            
         }
-        game.bulletLst.forEach(bull =>{
+        game.bulletLst.forEach(bull => {
             result = bull.shoot(element)
-            if(result){
+            if (result) {
                 var i = game.bulletLst.indexOf(bull)
                 game.bulletLst.splice(i,1)
             }
-
-        }
-        )
+        })
+        element.behave(game)
     });
     game.player.update(game.camera)
     game.map.detectOut(game.player)
-    
 }
 
 addEventListener('mousemove', (e) => {
