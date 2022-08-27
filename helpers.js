@@ -19,6 +19,9 @@ export function EuDistance(x1,y1,x2,y2){
     return Math.sqrt(a*a+b*b)
 
 } 
+export function AStar(){
+    
+}
 export function mapToCamX(mapX, cam) {
     return mapX - (cam.centerX-cam.width/2)
 }

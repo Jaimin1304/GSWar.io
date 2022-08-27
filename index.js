@@ -34,8 +34,6 @@ function animate() {
                 game.bulletLst.splice(i,1)
             }
 
-
-       
         }
         )
     });
