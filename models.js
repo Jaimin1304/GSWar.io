@@ -193,7 +193,7 @@ class Character extends Moveobj {
         this.y += this.v.y
     }
 
-    bounceback(obj) {
+    bounceback(obj, solid=false) {
         // do math
         let a = obj.x - this.x
         let b = obj.y - this.y
@@ -201,10 +201,32 @@ class Character extends Moveobj {
         let l2 = (this.r + obj.r - l)/2
         let x = a*l2/l
         let y = b*l2/l
-        this.x -= x
-        this.y -= y
-        obj.x += x
-        obj.y += y
+        if (solid) {
+            obj.x += x*2
+            obj.y += y*2
+        } else {
+            this.x -= x
+            this.y -= y
+            obj.x += x
+            obj.y += y
+        }
+    }
+}
+
+
+class Tower extends Character {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team) {
+        super(ctx, x, y, r, col, v, bulletV, vVal, name, team)
+    }
+
+    draw(cam) {
+        drawCircle(this.ctx, this.x, this.y, this.r+6, this.team.supCol, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
+        // inner ring
+        drawCircle(this.ctx, this.x, this.y, this.r-10, this.team.supCol, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r-20, this.col, cam)
+        // inner circle
+        drawCircle(this.ctx, this.x, this.y, 40, this.team.supCol, cam)
     }
 }
 
@@ -293,8 +315,6 @@ export class Bot extends Character {
         var nextposition = this.vision(game)
         this.move(nextposition[0],nextposition[1])
     }
-    
-
 }
 
 
@@ -345,6 +365,12 @@ export class Game {
                 r: 300
             },
         }
+        const noTeam = {
+            id: 2,
+            teamCol: [127, 127, 127],
+            supCol: [154, 205, 50],
+            base: null,
+        }
         // game elements
         this.map = new Map(ctx, mapWidth, mapHeight, wtTeam, bkTeam)
         this.cLst = botFactory(8, ctx, bkTeam).concat(botFactory(8, ctx, wtTeam))
@@ -370,9 +396,27 @@ export class Game {
         }
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
+        // initialize towers
+        this.towerlst = []
+        for (let i = 0; i < 3; i++) {
+            this.towerlst.push(
+                new Tower(
+                    ctx, 
+                    (mapWidth/4)*(i+1), 
+                    (mapHeight/4)*(3-i), 
+                    120, 
+                    noTeam.teamCol.slice(), 
+                    {x: 0, y: 0}, 
+                    7, 
+                    7, 
+                    `objective ${i+1}`,
+                    noTeam,
+                )
+            )
+        }
     }
 
-    shootBullet(character, e) {
+    shootBullet(character, camX, camY) {
         this.bulletLst.push(
             new Bullet(
                 this.ctx,
@@ -383,8 +427,8 @@ export class Game {
                 vectorHelper(
                     mapToCamX(character.x, this.camera),
                     mapToCamY(character.y, this.camera),
-                    e.clientX,
-                    e.clientY,
+                    camX,
+                    camY,
                     character.bulletV
                 ),
                 character,

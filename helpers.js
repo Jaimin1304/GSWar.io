@@ -46,9 +46,9 @@ export function drawCircle(ctx, x, y, r, col, cam=null) {
 export function drawProgress(ctx,mycanvas,percentage){
     var canvasX = 100;
     var canvasY = 100;
-//进度条是100%，所以要把一圈360度分成100份
+    // The progress bar is 100%, so a circle of 360 degrees should be divided into 100 parts
     var progress = Math.PI * percentage;
-//指定初始加载步长
+    // Specify the initial loading step
     var steps = 0.5;
     ctx.strokeStyle = '#dddddd';
     ctx.lineWidth = 20;
@@ -66,8 +66,8 @@ export function drawProgress(ctx,mycanvas,percentage){
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
-
 }
+
 export function calculateCurscore(allist){
     var white = 0
     var black = 0
@@ -79,11 +79,9 @@ export function calculateCurscore(allist){
             black = black + (255-allist[i].col[0])
         }
     }
-
     console.log(black/(black+white))
     return black/(black+white)
 }
-
 
 export function drawGradientCircle(ctx, x, y, inR, ouR, inCol, ouCol, cam=null) {
     ctx.beginPath()

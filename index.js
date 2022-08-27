@@ -14,17 +14,23 @@ function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     g.camera.update(g.camera)
     var percentage = calculateCurscore(g.cLst)
-    console.log(percentage)
     g.map.draw(g.camera,canvas,percentage)
-    // bullet's logic per frame
+    // bullets' logic per frame
     g.bulletLst.forEach(e => {
         e.update(g.camera)
         if (g.map.detectOut(e)) {
             let idx = g.bulletLst.indexOf(e)
             g.bulletLst.splice(idx, 1)
         }
-    });
-    // character's logic per frame
+        // detect bullet-tower collision
+        g.towerlst.forEach(t => {
+            if (e.shoot(t)) {
+                let idx = g.bulletLst.indexOf(e)
+                g.bulletLst.splice(idx, 1)
+            }
+        })
+    })
+    // characters' logic per frame
     for (let i = 0; i < g.cLst.length; i++) {
         g.cLst[i].update(g.camera)
         g.map.mapRestrict(g.cLst[i])
@@ -45,6 +51,17 @@ function animate() {
         })
         if (g.cLst[i] instanceof Bot) g.cLst[i].behave(g)
     }
+    // towers' logic per frame
+    g.towerlst.forEach(e => {
+        console.log(e.x + e.y)
+        e.update(g.camera)
+        // detect tower-character collision
+        g.cLst.forEach(c => {
+            if (e.detectEntity(c)) {
+                e.bounceback(c, true)
+            }
+        })
+    })
 }
 
 addEventListener('mousemove', (e) => {
@@ -53,7 +70,7 @@ addEventListener('mousemove', (e) => {
 })
 
 addEventListener('click', (e) => {
-    g.shootBullet(g.player, e)
+    g.shootBullet(g.player, e.clientX, e.clientY)
 })
 
 addEventListener('keydown', (e) => {
