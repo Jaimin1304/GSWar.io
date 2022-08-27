@@ -4,7 +4,6 @@ import {
     mapToCamY, 
     drawCircle, 
     drawLine, 
-    drawGradientCircle, 
     EuDistance, 
     drawName,
     drawRect,
@@ -173,7 +172,6 @@ class Character extends Moveobj {
             EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
             this.team.base.r - this.r
         ) {
-            console.log('0')
             this.col = this.col.map((a, i) => a + [1, 1, 1][i])
         }
         if (this.team.id == 1 && 
@@ -181,7 +179,6 @@ class Character extends Moveobj {
             EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
             this.team.base.r - this.r
         ) {
-            console.log('1')
             this.col = this.col.map((a, i) => a - [1, 1, 1][i])
         }
     }
@@ -302,8 +299,8 @@ function botFactory(num, ctx, team) {
         botLst.push(
             new Bot(
                 ctx,
-                100+Math.random()*2000,
-                100+Math.random()*1000,
+                team.base.x + (Math.random()-0.5)*2*team.base.r,
+                team.base.y + (Math.random()-0.5)*2*team.base.r,
                 26,
                 team.teamCol.slice(),
                 {x: 0, y: 0},
@@ -345,11 +342,29 @@ export class Game {
         }
         // game elements
         this.map = new Map(ctx, mapWidth, mapHeight, wtTeam, bkTeam)
-        this.player = new Player(ctx, 100, 100, 26, wtTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
+        this.cLst = botFactory(8, ctx, bkTeam).concat(botFactory(8, ctx, wtTeam))
+        // randomly allocate player's team
+        let wtRebirthRange = {
+            x: wtTeam.base.x + (Math.random()-0.5)*2*wtTeam.base.r,
+            y: wtTeam.base.y + (Math.random()-0.5)*2*wtTeam.base.r,
+        }
+        let bkRebirthRange = {
+            x: bkTeam.base.x + (Math.random()-0.5)*2*bkTeam.base.r,
+            y: bkTeam.base.y + (Math.random()-0.5)*2*bkTeam.base.r,
+        }
+        if (Math.random() > 0.5) {
+            this.player = new Player(
+                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', wtTeam
+            )
+            this.cLst[this.cLst.length-1] = this.player
+        } else {
+            this.player = new Player(
+                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', bkTeam
+            )
+            this.cLst[0] = this.player
+        }
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
-        this.cLst = botFactory(8, ctx, bkTeam).concat(botFactory(7, ctx, wtTeam))
-        this.cLst.push(this.player)
     }
 
     shootBullet(character, e) {
