@@ -23,7 +23,7 @@ function animate() {
             g.bulletLst.splice(idx, 1)
         }
         // detect bullet-tower collision
-        g.towerlst.forEach(t => {
+        g.towerLst.forEach(t => {
             if (e.shoot(t)) {
                 let idx = g.bulletLst.indexOf(e)
                 g.bulletLst.splice(idx, 1)
@@ -49,10 +49,21 @@ function animate() {
                 g.bulletLst.splice(idx, 1)
             }
         })
-        if (g.cLst[i] instanceof Bot) g.cLst[i].behave(g)
+        if (g.cLst[i] instanceof Bot) {
+            g.cLst[i].behave(g)
+            if (g.cLst[i].shootCounter > 60) {
+                g.cLst[i].shootCounter = 0
+                g.cLst[i].randomWeight = (Math.random()-0.5)*300
+                g.shootBullet(
+                    g.cLst[i], 
+                    mapToCamX(g.cLst[i].tarX, g.camera),
+                    mapToCamY(g.cLst[i].tarY, g.camera),
+                )
+            }
+        }
     }
     // towers' logic per frame
-    g.towerlst.forEach(e => {
+    g.towerLst.forEach(e => {
         e.update(g.camera)
         // shoot bullet
         if (e.counter > 10) {

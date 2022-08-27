@@ -11,6 +11,8 @@ import {
     calculateCurscore,
 } from "./helpers.js"
 
+import { AtkTowerState } from "./states.js"
+
 
 export class Map {
     constructor (ctx, width, height, wtTeam, bkTeam) {
@@ -155,6 +157,8 @@ class Character extends Moveobj {
         this.vVal = vVal
         this.name = name
         this.team = team
+        this.curX = 0
+        this.curY = 0
     }
 
     draw(cam) {
@@ -264,67 +268,45 @@ class Player extends Character {
 
 
 export class Bot extends Character {
-    constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team) {
+    constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team, visionR=800) {
         super(ctx, x, y, r, col, v, bulletV, vVal, name, team)
+        this.visionR = visionR
         this.curX = 0
         this.curY = 0
         this.tarX = 0
         this.tarY = 0
+        this.state = new AtkTowerState()
+        this.shootCounter = 0
+        this.randomWeight = (Math.random()-0.5)*300
+    }
+
+    behave(game) {
+        this.state.behave(this, game)
+    }
+
+    draw(cam) {
+        //drawGradientCircle(this.ctx, this.x, this.y, 20, 35, 'red', 'white', cam)
+        drawCircle(this.ctx, this.x, this.y, this.r+4, this.team.supCol, cam)
+        drawCircle(this.ctx, this.x, this.y, this.r, this.col, cam)
+        const vector = vectorHelper(
+            mapToCamX(this.x, cam), 
+            mapToCamY(this.y, cam), 
+            mapToCamX(this.curX, cam), 
+            mapToCamY(this.curY, cam), 
+            this.r
+        )
+        const x2 = this.x + vector.x
+        const y2 = this.y + vector.y
+        drawLine(this.ctx, this.x, this.y, x2, y2, 5, this.team.supCol, cam)
+        drawName(this.ctx, this, cam, this.team.supCol)
     }
 
     update(cam) {
+        this.shootCounter += 1
         this.draw(cam)
-        this.v = {x: 0, y: 0}
+        this.v = vectorHelper(this.x, this.y, this.curX, this.curY, this.vVal)
         this.x += this.v.x
         this.y += this.v.y
-    }
-
-    move(newx,newy) {
-        this.x = newx
-        this.y = newy
-    }
-
-    vision(game) {
-        var botlist = game.cLst
-        var player = game.player
-        var messageList = [[this.x,this.y,player.x,player.y]]
-        for(let i in botlist) {
-            if(botlist[i].team.id != this.team.id) {
-                messageList.push([this.x,this.y,i.x,i.y])
-            }
-        }
-        var npos1 = [this.x+1,this.y]
-        var npos2 = [this.x-1,this.y]
-        var npos3 = [this.x,this.y+1]
-        var npos4 = [this.x,this.y-1]
-        var nearest
-        var distance = Infinity
-        for(let key in messageList){
-            var rd = EuDistance(messageList[key][0],messageList[key][1],messageList[key][2],messageList[key][3])
-            if(distance > rd){
-                distance = rd
-                nearest = [messageList[key][2],messageList[key][3]]
-            }
-        }
-        this.tarX = nearest[0]
-        this.tarY = nearest[1]
-        
-        distance = Infinity
-        var nextpositon 
-        var positionarray = [npos1,npos2,npos3,npos4]
-        for(let a in positionarray) {
-            var d = EuDistance(nearest[0],nearest[1],positionarray[a][0],positionarray[a][1])
-            if(distance > d){
-                distance = d
-                nextpositon = positionarray[a]
-            }
-        }
-        return nextpositon
-    }
-
-    behave(game){
-        var nextposition = this.vision(game)
-        this.move(nextposition[0],nextposition[1])
     }
 }
 
@@ -340,8 +322,8 @@ function botFactory(num, ctx, team) {
                 26,
                 team.teamCol.slice(),
                 {x: 0, y: 0},
-                3,
                 7,
+                2,
                 `Bot ${i}`,
                 team,
             )
@@ -384,7 +366,9 @@ export class Game {
         }
         // game elements
         this.map = new Map(ctx, mapWidth, mapHeight, wtTeam, bkTeam)
-        this.cLst = botFactory(8, ctx, bkTeam).concat(botFactory(8, ctx, wtTeam))
+        this.wtTeam = botFactory(8, ctx, wtTeam)
+        this.bkTeam = botFactory(8, ctx, bkTeam)
+        this.cLst = this.bkTeam.concat(this.wtTeam)
         // randomly allocate player's team
         let wtRebirthRange = {
             x: wtTeam.base.x + (Math.random()-0.5)*2*wtTeam.base.r,
@@ -396,21 +380,21 @@ export class Game {
         }
         if (Math.random() > 0.5) {
             this.player = new Player(
-                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol.slice(), {x: 2, y: 2}, 7, 7, 'Luke', wtTeam
+                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol.slice(), {x: 2, y: 2}, 7, 2, 'Luke', wtTeam
             )
             this.cLst[this.cLst.length-1] = this.player
         } else {
             this.player = new Player(
-                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol.slice(), {x: 2, y: 2}, 7, 7, 'Luke', bkTeam
+                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol.slice(), {x: 2, y: 2}, 7, 2, 'Luke', bkTeam
             )
             this.cLst[0] = this.player
         }
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
         // initialize towers
-        this.towerlst = []
+        this.towerLst = []
         for (let i = 0; i < 3; i++) {
-            this.towerlst.push(
+            this.towerLst.push(
                 new Tower(
                     ctx, 
                     (mapWidth/4)*(i+1), 

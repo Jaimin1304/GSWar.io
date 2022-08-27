@@ -150,3 +150,24 @@ export function drawRect(ctx, topLeftX, topLeftY, width, height, lineWidth, col,
     }
     ctx.stroke()
 }
+
+export function areaHasElement(objLst, r, x, y) {
+    objLst.forEach(e => {
+        if (EuDistance(x, y, e.x, e.y) < r) {
+            return true
+        }
+    })
+    return false
+}
+
+export function areaNearestObj(objLst, r, x, y) {
+    let result = null
+    let dist = r
+    objLst.forEach(e => {
+        if (EuDistance(x, y, e.x, e.y) < dist) {
+            dist = EuDistance(x, y, e.x, e.y)
+            result = e
+        }
+    })
+    return result
+}
