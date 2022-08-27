@@ -7,6 +7,8 @@ import {
     EuDistance, 
     drawName,
     drawRect,
+    drawProgress,
+    calculateCurscore,
 } from "./helpers.js"
 
 
@@ -34,7 +36,7 @@ export class Map {
                moveobj.y > this.height)
     }
 
-    draw(cam) {
+    draw(cam,canvas,percentage) {
         let rgbLst = [80, 80, 80]
         // draw grid
         for (let i = 0; i < this.width; i+=this.gridGap) {
@@ -62,6 +64,7 @@ export class Map {
             this.bkTeam.supCol.map((a, i) => a + rgbLst[i]),
             cam,
         )
+        drawProgress(this.ctx,canvas,percentage)
     }
 }
 
@@ -290,6 +293,8 @@ export class Bot extends Character {
         var nextposition = this.vision(game)
         this.move(nextposition[0],nextposition[1])
     }
+    
+
 }
 
 

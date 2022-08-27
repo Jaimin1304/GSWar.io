@@ -1,3 +1,5 @@
+import { calculateCurscore } from "./helpers.js"
+
 import { Game, Bot } from "./models.js"
 
 const canvas = document.querySelector('canvas')
@@ -12,8 +14,9 @@ function animate() {
     requestAnimationFrame(animate)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     g.camera.update(g.camera)
-
-    g.map.draw(g.camera)
+    var percentage = calculateCurscore(g.cLst)
+    console.log(percentage)
+    g.map.draw(g.camera,canvas,percentage)
     // bullet's logic per frame
     g.bulletLst.forEach(e => {
         e.update(g.camera)
