@@ -1,33 +1,59 @@
 import { 
-    vectorHelper, mapToCamX, mapToCamY, colArrToStr, drawCircle, drawLine, drawGradientCircle,EuDistance,drawName
+    vectorHelper, 
+    mapToCamX, 
+    mapToCamY, 
+    colArrToStr, 
+    drawCircle, 
+    drawLine, 
+    drawGradientCircle, 
+    EuDistance, 
+    drawName,
+    drawRect,
 } from "./helpers.js"
 
 
 export class Map {
-    constructor (ctx, width, height) {
+    constructor (ctx, width, height, wtTeam, bkTeam) {
         this.ctx = ctx
         this.width = width
         this.height = height
+        this.wtTeam = wtTeam
+        this.bkTeam = bkTeam
     }
 
-    detectOut(moveObj) {
+    mapRestrict(moveObj) {
         if (moveObj.x < 0) moveObj.x = 0
         if (moveObj.x > this.width) moveObj.x = this.width
         if (moveObj.y < 0) moveObj.y = 0
         if (moveObj.y > this.height) moveObj.y = this.height
     }
 
+    detectOut(moveObj) {
+        return (moveObj.x < 0 || 
+               moveObj.x > this.width || 
+               moveObj.y < 0 || 
+               moveObj.y > this.height)
+    }
+
     draw(cam) {
-        this.ctx.beginPath()
-        this.ctx.lineWidth = "12"
-        this.ctx.strokeStyle = "rgb(255,0,100)"
-        this.ctx.rect(
-            mapToCamX(0, cam), 
-            mapToCamY(0, cam), 
-            this.width,
-            this.height,
+        let rgbLst = [80, 80, 80]
+        drawRect(this.ctx, 0, 0, this.width, this.height, 14, [255, 0, 0], cam)
+        drawCircle(
+            this.ctx,
+            this.wtTeam.base.x,
+            this.wtTeam.base.y,
+            this.wtTeam.base.r,
+            colArrToStr(this.wtTeam.supCol.map((a, i) => a + rgbLst[i])),
+            cam,
         )
-        this.ctx.stroke()
+        drawCircle(
+            this.ctx,
+            this.bkTeam.base.x,
+            this.bkTeam.base.y,
+            this.bkTeam.base.r,
+            colArrToStr(this.bkTeam.supCol.map((a, i) => a + rgbLst[i])),
+            cam,
+        )
     }
 }
 
@@ -94,7 +120,7 @@ class Bullet extends MoveObj {
     }
 
     shoot(Obj) {
-        if (this.detectEntity(Obj)) {
+        if (this.detectEntity(Obj) && this.col[0] != Obj.col[0]) {
             var i = 0
             while (i<3) {
                 if(this.col[i]<Obj.col[i]){
@@ -129,6 +155,33 @@ class Character extends MoveObj {
         const y2 = this.y + vector.y
         drawLine(this.ctx, this.x, this.y, x2, y2, 5, colArrToStr(this.team.supCol), cam)
         drawName(this.ctx, this, cam, this.team.supCol)
+    }
+
+    recover() {
+        // if character is at its team base, its own color will be purified
+        if (this.team.id == 0 && 
+            this.col[0] < this.team.teamCol[0] && 
+            EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
+            this.team.base.r - this.r
+        ) {
+            console.log('0')
+            this.col = this.col.map((a, i) => a + [0.1, 0.1, 0.1][i])
+        }
+        if (this.team.id == 1 && 
+            this.col[0] > this.team.teamCol[0] && 
+            EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
+            this.team.base.r - this.r
+        ) {
+            console.log('1')
+            this.col = this.col.map((a, i) => a - [0.1, 0.1, 0.1][i])
+        }
+    }
+
+    update(cam) {
+        this.draw(cam)
+        this.recover()
+        this.x += this.v.x
+        this.y += this.v.y
     }
 
     bounceback(){
@@ -255,7 +308,7 @@ function botFactory(num, ctx, team) {
 
 
 export class Game {
-    constructor(ctx, canvas) {
+    constructor(ctx, canvas, mapWidth, mapHeight) {
         this.ctx = ctx
         this.canvas = canvas
         // Identification Aura of different teams
@@ -263,18 +316,29 @@ export class Game {
             id: 0,
             teamCol: [255, 255, 255],
             supCol: [100, 100, 255],
+            base: {
+                x: 400,
+                y: 400,
+                r: 300
+            },
         }
         const bkTeam = {
             id: 0,
             teamCol: [0, 0, 0],
             supCol: [255, 100, 100],
+            base: {
+                x: mapWidth-400,
+                y: mapHeight-400,
+                r: 300
+            },
         }
         // game elements
-        this.map = new Map(ctx, 3000, 1500)
-        this.player = new Player(ctx, 100, 100, 26, wtTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
+        this.map = new Map(ctx, mapWidth, mapHeight, wtTeam, bkTeam)
+        this.player = new Player(ctx, 100, 100, 26, [0, 0, 0], {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
-        this.botLst = botFactory(10, ctx, bkTeam)
+        this.cLst = botFactory(15, ctx, bkTeam)
+        this.cLst.push(this.player)
     }
 
     shootBullet(character, e) {
