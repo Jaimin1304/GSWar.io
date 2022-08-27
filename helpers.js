@@ -13,12 +13,13 @@ export function vectorHelper(selfX, selfY, tarX, tarY, vectorVal) {
     }
     return v
 }
+
 export function EuDistance(x1,y1,x2,y2){
     var a = x1-x2
     var b = y1 -y2 
     return Math.sqrt(a*a+b*b)
+}
 
-} 
 export function mapToCamX(mapX, cam) {
     return mapX - (cam.centerX-cam.width/2)
 }
@@ -33,9 +34,9 @@ export function colArrToStr(colArr) {
 
 export function drawCircle(ctx, x, y, r, col, cam=null) {
     ctx.beginPath()
-    if (cam == null) { // draw on map
+    if (cam == null) { // draw on camera
         ctx.arc(x, y, r, 0, Math.PI*2, false)
-    } else { // draw on camera
+    } else { // draw on map
         ctx.arc(mapToCamX(x, cam), mapToCamY(y, cam), r, 0, Math.PI*2, false)
     }
     ctx.fillStyle = col
@@ -45,9 +46,9 @@ export function drawCircle(ctx, x, y, r, col, cam=null) {
 export function drawGradientCircle(ctx, x, y, inR, ouR, inCol, ouCol, cam=null) {
     ctx.beginPath()
     let gd
-    if (cam == null) {
+    if (cam == null) { // draw on camera
         gd = ctx.createRadialGradient(x, y, inR, x, y, ouR)
-    } else {
+    } else { // draw on map
         gd = ctx.createRadialGradient(
             mapToCamX(x, cam), 
             mapToCamY(y, cam), 
@@ -70,10 +71,10 @@ export function drawGradientCircle(ctx, x, y, inR, ouR, inCol, ouCol, cam=null) 
 
 export function drawLine(ctx, x1, y1, x2, y2, width, col, cam=null) {
     ctx.beginPath()
-    if (cam == null) { // draw on map
+    if (cam == null) { // draw on camera
         ctx.moveTo(x1, y1)
         ctx.lineTo(x2, y2)
-    } else { // draw on camera
+    } else { // draw on map
         ctx.moveTo(mapToCamX(x1, cam), mapToCamY(y1, cam))
         ctx.lineTo(mapToCamX(x2, cam), mapToCamY(y2, cam))
     }
@@ -87,4 +88,26 @@ export function drawName(ctx, char, cam, col) {
     ctx.fillStyle = colArrToStr(col)
     ctx.textAlign = "center"
     ctx.fillText(`${char.name} (${char.col[0]})`, mapToCamX(char.x, cam), mapToCamY(char.y, cam)-char.r*1.5)
+}
+
+export function drawRect(ctx, topLeftX, topLeftY, width, height, lineWidth, col, cam=null) {
+    ctx.beginPath()
+    ctx.lineWidth = lineWidth.toString()
+    ctx.strokeStyle = colArrToStr(col)
+    if (cam == null) { // draw on camera
+        ctx.rect(
+            topLeftX,
+            topLeftY,
+            width,
+            height,
+        )
+    } else { // draw on map
+        ctx.rect(
+            mapToCamX(topLeftX, cam),
+            mapToCamY(topLeftY, cam),
+            width,
+            height,
+        )
+    }
+    ctx.stroke()
 }
