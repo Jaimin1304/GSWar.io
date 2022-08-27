@@ -184,9 +184,22 @@ class Character extends MoveObj {
         this.y += this.v.y
     }
 
-    bounceback(){
-        this.x = this.x-3
-        this.y = this.y-3
+    bounceback(obj){
+        var  a 
+        var b 
+        if(this.v.x >0){
+            a = -1 
+        }else{
+            a = 1
+        }
+        if(this.v.y > 0){
+            b = -1 
+        }else{
+            b = 1
+        }
+
+        this.x = this.x+a*8
+        this.y = this.y+b*8
     }
 }
 
@@ -337,7 +350,7 @@ export class Game {
         this.player = new Player(ctx, 100, 100, 26, [0, 0, 0], {x: 2, y: 2}, 7, 7, 'Luke', wtTeam)
         this.camera = new Camera(ctx, canvas.width, canvas.height, this.player)
         this.bulletLst = []
-        this.cLst = botFactory(15, ctx, bkTeam)
+        this.cLst = botFactory(8, ctx, bkTeam)
         this.cLst.push(this.player)
     }
 
