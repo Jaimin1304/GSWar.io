@@ -43,6 +43,47 @@ export function drawCircle(ctx, x, y, r, col, cam=null) {
     ctx.fill()
 }
 
+export function drawProgress(ctx,mycanvas,percentage){
+    var canvasX = 100;
+    var canvasY = 100;
+//进度条是100%，所以要把一圈360度分成100份
+    var progress = Math.PI * percentage;
+//指定初始加载步长
+    var steps = 0.5;
+    ctx.strokeStyle = '#dddddd';
+    ctx.lineWidth = 20;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvasX, canvasY, 90, 0, Math.PI * 2, false)
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+    ctx.strokeStyle = "#47cab0";
+    ctx.lineWidth = 20;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvasX,canvasY,90, -Math.PI/2, -Math.PI/2+steps*progress,false);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+
+}
+export function calculateCurscore(allist){
+    var white = 0
+    var black = 0
+    for(let i in allist){
+        if(allist[i].team.id == 0){
+            white = white+(255-allist[i].col[0])
+        }
+        else{
+            black = black + (255-allist[i].col[0])
+        }
+    }
+    
+    return black/(black+white)
+}
+
+
 export function drawGradientCircle(ctx, x, y, inR, ouR, inCol, ouCol, cam=null) {
     ctx.beginPath()
     let gd

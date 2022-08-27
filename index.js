@@ -1,3 +1,4 @@
+import { calculateCurscore } from "./helpers.js"
 import { Game } from "./models.js"
 
 const canvas = document.querySelector('canvas')
@@ -12,8 +13,9 @@ function animate() {
     requestAnimationFrame(animate)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     g.camera.update(g.camera)
-
-    g.map.draw(g.camera)
+    var percentage = calculateCurscore(g.cLst)
+    console.log(percentage)
+    g.map.draw(g.camera,canvas,percentage)
     // bullet's logic per frame
     g.bulletLst.forEach(e => {
         e.update(g.camera)
@@ -31,7 +33,7 @@ function animate() {
         // detect character-character collision
         for (let j = 0; j < g.cLst.length; j++) {
             if (i != j && g.cLst[i].detectEntity(g.cLst[j])) {
-                g.cLst[i].bounceback()
+                g.cLst[i].bounceback(g.cLst[j])
             }
         }
         // detect bullet-character collision
@@ -43,24 +45,6 @@ function animate() {
         })
         g.cLst[i].behave(g)
     }
-    // g.cLst.forEach(element => {
-    //     element.update(g.camera)
-    //     g.map.mapRestrict(element)
-    //     // detect character-character collision
-    //     if (g.player.detectEntity(element)) {
-    //         g.player.bounceback()
-    //     }
-    //     // detect bullet-character collision
-    //     g.bulletLst.forEach(e => {
-    //         if (e.shoot(element)) {
-    //             let i = g.bulletLst.indexOf(e)
-    //             g.bulletLst.splice(i,1)
-    //         }
-    //     })
-    // })
-    // // player's logic per frame
-    // g.player.update(g.camera)
-    // g.map.mapRestrict(g.player)
 }
 
 addEventListener('mousemove', (e) => {
