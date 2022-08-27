@@ -1,4 +1,4 @@
-import { Game } from "./models.js"
+import { Game, Bot } from "./models.js"
 
 const canvas = document.querySelector('canvas')
 const ctx = canvas.getContext('2d')
@@ -6,7 +6,7 @@ const ctx = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
-const g = new Game(ctx, canvas, 3520, 1980)
+const g = new Game(ctx, canvas, 3500, 2000)
 
 function animate() {
     requestAnimationFrame(animate)
@@ -41,7 +41,7 @@ function animate() {
                 g.bulletLst.splice(idx, 1)
             }
         })
-        g.cLst[i].behave(g)
+        if (g.cLst[i] instanceof Bot) g.cLst[i].behave(g)
     }
 }
 
@@ -52,7 +52,6 @@ addEventListener('mousemove', (e) => {
 
 addEventListener('click', (e) => {
     g.shootBullet(g.player, e)
-    console.log(g.bulletLst)
 })
 
 addEventListener('keydown', (e) => {

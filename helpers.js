@@ -39,7 +39,7 @@ export function drawCircle(ctx, x, y, r, col, cam=null) {
     } else { // draw on map
         ctx.arc(mapToCamX(x, cam), mapToCamY(y, cam), r, 0, Math.PI*2, false)
     }
-    ctx.fillStyle = col
+    ctx.fillStyle = colArrToStr(col)
     ctx.fill()
 }
 
@@ -58,8 +58,8 @@ export function drawGradientCircle(ctx, x, y, inR, ouR, inCol, ouCol, cam=null) 
             ouR
         )
     }
-    gd.addColorStop(0, inCol)
-    gd.addColorStop(1, ouCol)
+    gd.addColorStop(0, colArrToStr(inCol))
+    gd.addColorStop(1, colArrToStr(ouCol))
     if (cam == null) {
         ctx.arc(x, y, 80, 0, Math.PI*2, false);
     } else {
@@ -79,7 +79,7 @@ export function drawLine(ctx, x1, y1, x2, y2, width, col, cam=null) {
         ctx.lineTo(mapToCamX(x2, cam), mapToCamY(y2, cam))
     }
     ctx.lineWidth = width
-    ctx.strokeStyle = col
+    ctx.strokeStyle = colArrToStr(col)
     ctx.stroke()
 }
 
