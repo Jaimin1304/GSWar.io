@@ -31,7 +31,7 @@ function animate() {
         // detect character-character collision
         for (let j = 0; j < g.cLst.length; j++) {
             if (i != j && g.cLst[i].detectEntity(g.cLst[j])) {
-                g.cLst[i].bounceback()
+                g.cLst[i].bounceback(g.cLst[j])
             }
         }
         // detect bullet-character collision

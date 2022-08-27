@@ -165,7 +165,7 @@ class Character extends MoveObj {
             this.team.base.r - this.r
         ) {
             console.log('0')
-            this.col = this.col.map((a, i) => a + [0.1, 0.1, 0.1][i])
+            this.col = this.col.map((a, i) => a + [1, 1, 1][i])
         }
         if (this.team.id == 1 && 
             this.col[0] > this.team.teamCol[0] && 
@@ -173,7 +173,7 @@ class Character extends MoveObj {
             this.team.base.r - this.r
         ) {
             console.log('1')
-            this.col = this.col.map((a, i) => a - [0.1, 0.1, 0.1][i])
+            this.col = this.col.map((a, i) => a - [1, 1, 1][i])
         }
     }
 
@@ -184,9 +184,17 @@ class Character extends MoveObj {
         this.y += this.v.y
     }
 
-    bounceback(){
-        this.x = this.x-3
-        this.y = this.y-3
+    bounceback(obj){
+        let a = obj.x - this.x
+        let b = obj.y - this.y
+        let l = (a**2 + b**2)**(1/2)
+        let l2 = (this.r + obj.r - l)/2
+        let x = a*l2/l
+        let y = b*l2/l
+        this.x -= x
+        this.y -= y
+        obj.x += x
+        obj.y += y
     }
 }
 
@@ -228,12 +236,12 @@ class Bot extends Character {
         this.y += this.v.y
     }
 
-    move(newx,newy){
+    move(newx,newy) {
         this.x = newx
         this.y = newy
     }
 
-    vision(game){
+    vision(game) {
         var botlist = game.botLst
         var player = game.player
         var messageList = [[this.x,this.y,player.x,player.y]]
