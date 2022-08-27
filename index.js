@@ -1,4 +1,4 @@
-import { calculateCurscore } from "./helpers.js"
+import { calculateCurscore, mapToCamX, mapToCamY } from "./helpers.js"
 import { Game, Bot } from "./models.js"
 
 const canvas = document.querySelector('canvas')
@@ -53,8 +53,16 @@ function animate() {
     }
     // towers' logic per frame
     g.towerlst.forEach(e => {
-        console.log(e.x + e.y)
         e.update(g.camera)
+        // shoot bullet
+        if (e.counter > 10) {
+            e.counter = 0
+            g.shootBullet(
+                e, 
+                mapToCamX(e.x + (Math.random()-0.5)*2*100, g.camera),
+                mapToCamY(e.y + (Math.random()-0.5)*2*100, g.camera),
+            )
+        }
         // detect tower-character collision
         g.cLst.forEach(c => {
             if (e.detectEntity(c)) {

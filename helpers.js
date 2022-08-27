@@ -79,7 +79,6 @@ export function calculateCurscore(allist){
             black = black + (255-allist[i].col[0])
         }
     }
-    console.log(black/(black+white))
     return black/(black+white)
 }
 

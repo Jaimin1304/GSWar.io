@@ -175,13 +175,15 @@ class Character extends Moveobj {
             EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
             this.team.base.r - this.r
         ) {
+            console.log('0')
             this.col = this.col.map((a, i) => a + [1, 1, 1][i])
         }
         if (this.team.id == 1 && 
             this.col[0] > this.team.teamCol[0] && 
             EuDistance(this.x, this.y, this.team.base.x, this.team.base.y) < 
             this.team.base.r - this.r
-        ) {
+            ) {
+            console.log('1')
             this.col = this.col.map((a, i) => a - [1, 1, 1][i])
         }
     }
@@ -217,6 +219,7 @@ class Character extends Moveobj {
 class Tower extends Character {
     constructor(ctx, x, y, r, col, v, bulletV, vVal, name, team) {
         super(ctx, x, y, r, col, v, bulletV, vVal, name, team)
+        this.counter = 0
     }
 
     draw(cam) {
@@ -227,6 +230,13 @@ class Tower extends Character {
         drawCircle(this.ctx, this.x, this.y, this.r-20, this.col, cam)
         // inner circle
         drawCircle(this.ctx, this.x, this.y, 40, this.team.supCol, cam)
+    }
+
+    update(cam) {
+        this.counter += 1
+        this.draw(cam)
+        this.x += this.v.x
+        this.y += this.v.y
     }
 }
 
@@ -244,6 +254,7 @@ class Player extends Character {
 
     update(cam) {
         this.draw(cam)
+        this.recover()
         if (this.w) this.y -= this.v.y
         if (this.s) this.y += this.v.y
         if (this.a) this.x -= this.v.x
@@ -385,12 +396,12 @@ export class Game {
         }
         if (Math.random() > 0.5) {
             this.player = new Player(
-                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', wtTeam
+                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol.slice(), {x: 2, y: 2}, 7, 7, 'Luke', wtTeam
             )
             this.cLst[this.cLst.length-1] = this.player
         } else {
             this.player = new Player(
-                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol, {x: 2, y: 2}, 7, 7, 'Luke', bkTeam
+                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol.slice(), {x: 2, y: 2}, 7, 7, 'Luke', bkTeam
             )
             this.cLst[0] = this.player
         }
