@@ -1,5 +1,4 @@
 import { calculateCurscore } from "./helpers.js"
-
 import { Game, Bot } from "./models.js"
 
 const canvas = document.querySelector('canvas')
