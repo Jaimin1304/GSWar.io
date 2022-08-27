@@ -43,24 +43,6 @@ function animate() {
         })
         g.cLst[i].behave(g)
     }
-    // g.cLst.forEach(element => {
-    //     element.update(g.camera)
-    //     g.map.mapRestrict(element)
-    //     // detect character-character collision
-    //     if (g.player.detectEntity(element)) {
-    //         g.player.bounceback()
-    //     }
-    //     // detect bullet-character collision
-    //     g.bulletLst.forEach(e => {
-    //         if (e.shoot(element)) {
-    //             let i = g.bulletLst.indexOf(e)
-    //             g.bulletLst.splice(i,1)
-    //         }
-    //     })
-    // })
-    // // player's logic per frame
-    // g.player.update(g.camera)
-    // g.map.mapRestrict(g.player)
 }
 
 addEventListener('mousemove', (e) => {
