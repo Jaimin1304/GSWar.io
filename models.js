@@ -380,12 +380,12 @@ export class Game {
         }
         if (Math.random() > 0.5) {
             this.player = new Player(
-                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol.slice(), {x: 2, y: 2}, 7, 2, 'Luke', wtTeam
+                ctx, wtRebirthRange.x, wtRebirthRange.y, 26, wtTeam.teamCol.slice(), {x: 2, y: 2}, 4, 2, 'Luke', wtTeam
             )
             this.cLst[this.cLst.length-1] = this.player
         } else {
             this.player = new Player(
-                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol.slice(), {x: 2, y: 2}, 7, 2, 'Luke', bkTeam
+                ctx, bkRebirthRange.x, bkRebirthRange.y, 26, bkTeam.teamCol.slice(), {x: 2, y: 2}, 4, 2, 'Luke', bkTeam
             )
             this.cLst[0] = this.player
         }
@@ -402,8 +402,8 @@ export class Game {
                     120, 
                     noTeam.teamCol.slice(), 
                     {x: 0, y: 0}, 
-                    7, 
-                    7, 
+                    4, 
+                    4, 
                     `objective ${i+1}`,
                     noTeam,
                 )
